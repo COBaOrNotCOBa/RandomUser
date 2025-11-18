@@ -18,7 +18,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
@@ -56,7 +55,6 @@ import com.example.randomuser.presentation.theme.RandomUserTheme
 
 @Composable
 fun UserDetailsScreen(
-    userId: String,
     viewModel: UserDetailsViewModel = hiltViewModel(),
     onBackClick: () -> Unit
 ) {
@@ -106,13 +104,12 @@ private fun UserDetailsContent(
     user: User,
     onBackClick: () -> Unit
 ) {
-    // выбранная вкладка: 0 - общая инфо, 1 - phone, 2 - email, 3 - location
     var selectedTab by remember { mutableStateOf(0) }
 
     val gradientColors = listOf(
-        Color(0xFFBBDEFB), // light blue
-        Color(0xFF2196F3), // medium
-        Color(0xFF0D47A1)  // dark
+        Color(0xFFBBDEFB),
+        Color(0xFF2196F3),
+        Color(0xFF0D47A1)
     )
 
     Column(
