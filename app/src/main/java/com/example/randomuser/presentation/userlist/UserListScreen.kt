@@ -28,7 +28,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.randomuser.domain.model.User
-import com.example.randomuser.presentation.components.RandomUserTopBar
 import com.example.randomuser.presentation.components.UserListItem
 import com.example.randomuser.presentation.model.UiState
 import com.example.randomuser.presentation.preview.sampleUsers
@@ -63,14 +62,7 @@ fun UserListScreenContent(
     onCreateUserClick: () -> Unit,
     onUserClick: (String) -> Unit
 ) {
-    Scaffold(
-        topBar = {
-            RandomUserTopBar(
-                title = "Users",
-                canNavigateBack = false
-            )
-        }
-    ) { padding ->
+    Scaffold() { padding ->
         Box(
             modifier = Modifier
                 .padding(padding)
@@ -116,7 +108,6 @@ fun UserListScreenContent(
                 UiState.Idle -> Unit
             }
 
-            // Квадратная синяя кнопка с плюсиком — снизу слева
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)

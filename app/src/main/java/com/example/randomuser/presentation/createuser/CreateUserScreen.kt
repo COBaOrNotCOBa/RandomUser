@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -27,6 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -66,7 +68,7 @@ fun CreateUserScreenContent(
     Scaffold(
         topBar = {
             RandomUserTopBar(
-                title = "Create User",
+                title = "Generate User",
                 canNavigateBack = true,
                 onBackClick = onBackClick
             )
@@ -85,11 +87,11 @@ fun CreateUserScreenContent(
 
                 Spacer(Modifier.height(24.dp))
 
-                // Select Gender
                 Text(
                     text = "Select Gender:",
                     color = MaterialTheme.colorScheme.primary,
-                    style = MaterialTheme.typography.bodyLarge
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Bold,
                 )
 
                 Spacer(Modifier.height(8.dp))
@@ -109,7 +111,6 @@ fun CreateUserScreenContent(
                             else -> "Any"
                         },
                         onValueChange = {},
-                        label = { Text("Gender") },
                         trailingIcon = {
                             ExposedDropdownMenuDefaults.TrailingIcon(expanded = genderExpanded)
                         },
@@ -140,11 +141,11 @@ fun CreateUserScreenContent(
 
                 Spacer(Modifier.height(24.dp))
 
-                // Select Nationality
                 Text(
                     text = "Select Nationality:",
                     color = MaterialTheme.colorScheme.primary,
-                    style = MaterialTheme.typography.bodyLarge
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Bold,
                 )
 
                 Spacer(Modifier.height(8.dp))
@@ -160,7 +161,6 @@ fun CreateUserScreenContent(
                         readOnly = true,
                         value = selectedNat?.uppercase() ?: "Any",
                         onValueChange = {},
-                        label = { Text("Nationality") },
                         trailingIcon = {
                             ExposedDropdownMenuDefaults.TrailingIcon(expanded = natExpanded)
                         },
@@ -187,7 +187,6 @@ fun CreateUserScreenContent(
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                // Кнопка Generate у нижнего края
                 Button(
                     onClick = onGenerateClick,
                     modifier = Modifier
@@ -196,9 +195,10 @@ fun CreateUserScreenContent(
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary,
                         contentColor = Color.White
-                    )
+                    ),
+                    shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("Generate")
+                    Text("GENERATE")
                 }
             }
 
@@ -232,7 +232,7 @@ fun CreateUserScreenContent(
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, showSystemUi = false)
 @Composable
 fun CreateUserScreenPreview_Idle() {
     RandomUserTheme {

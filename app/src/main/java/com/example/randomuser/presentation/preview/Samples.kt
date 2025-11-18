@@ -10,6 +10,7 @@ val sampleUser = User(
     phone = "+44 20 7946 0958",
     cell = "+44 7700 900123",
     age = 30,
+    date = "2001-01-01",
     country = "United Kingdom",
     city = "London",
     street = "221B Baker Street",

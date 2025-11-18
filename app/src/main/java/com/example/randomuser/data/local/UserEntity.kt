@@ -12,6 +12,7 @@ data class UserEntity(
     val phone: String?,
     val cell: String?,
     val age: Int?,
+    val date: String?,
     val country: String?,
     val city: String?,
     val street: String?,

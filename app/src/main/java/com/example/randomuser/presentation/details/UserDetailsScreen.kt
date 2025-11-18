@@ -1,7 +1,6 @@
 package com.example.randomuser.presentation.details
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -44,6 +44,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -55,6 +56,7 @@ import com.example.randomuser.presentation.theme.RandomUserTheme
 
 @Composable
 fun UserDetailsScreen(
+//    userId: String,
     viewModel: UserDetailsViewModel = hiltViewModel(),
     onBackClick: () -> Unit
 ) {
@@ -118,12 +120,11 @@ private fun UserDetailsContent(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(100.dp)
+                .height(160.dp)
                 .background(
                     Brush.horizontalGradient(gradientColors)
                 )
         ) {
-            // стрелка назад в белом кружке
             IconButton(
                 onClick = onBackClick,
                 modifier = Modifier
@@ -147,20 +148,20 @@ private fun UserDetailsContent(
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
-                // место под аватар, приветствие и имя
-                Spacer(Modifier.height(40.dp))
+                Spacer(Modifier.height(75.dp))
 
                 Text(
                     text = "Hi how are you today?",
-                    color = Color.LightGray,
+                    color = Color.Gray,
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
 
                 Text(
                     text = "I'm",
-                    color = Color.LightGray,
+                    color = Color.Gray,
                     style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold,
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
 
@@ -169,13 +170,13 @@ private fun UserDetailsContent(
                 Text(
                     text = user.fullName,
                     color = MaterialTheme.colorScheme.primary,
-                    style = MaterialTheme.typography.headlineSmall,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Bold,
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
 
                 Spacer(Modifier.height(16.dp))
 
-                // Card с табами и содержимым
                 Card(
                     modifier = Modifier
                         .fillMaxSize()
@@ -214,16 +215,14 @@ private fun UserDetailsContent(
                 }
             }
 
-            // аватар поверх границы синего/белого фона
             AsyncImage(
                 model = user.pictureUrl,
                 contentDescription = null,
                 modifier = Modifier
-                    .size(96.dp)
+                    .size(140.dp)
                     .align(Alignment.TopCenter)
-                    .offset(y = (-48).dp) // половина размера вверх
-                    .clip(CircleShape)
-                    .border(4.dp, Color.White, CircleShape),
+                    .offset(y = (-70).dp)
+                    .clip(CircleShape),
                 contentScale = ContentScale.Crop
             )
         }
@@ -279,33 +278,32 @@ private fun DetailsTabsHeader(
 @Composable
 private fun UserInfoTab(user: User) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        InfoRow(label = "First name", value = user.fullName.split(" ").getOrNull(1) ?: "")
-        InfoRow(label = "Last name", value = user.fullName.split(" ").lastOrNull() ?: "")
-        InfoRow(label = "Gender", value = user.gender ?: "")
-        InfoRow(label = "Age", value = user.age?.toString() ?: "")
-        // DOB ты можешь сохранить отдельно в доменной модели; пока оставим пустым или заглушку
-        InfoRow(label = "Date of birth", value = "")
+        InfoRow(label = "First name:", value = user.fullName.split(" ").getOrNull(1) ?: "")
+        InfoRow(label = "Last name:", value = user.fullName.split(" ").lastOrNull() ?: "")
+        InfoRow(label = "Gender:", value = user.gender ?: "")
+        InfoRow(label = "Age:", value = user.age?.toString() ?: "")
+        InfoRow(label = "Date of birth:", value = user.date?.substringBefore("T") ?: "")
     }
 }
 
 @Composable
 private fun PhoneTab(user: User) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        InfoRow(label = "Phone", value = user.phone ?: "")
-        InfoRow(label = "Cell", value = user.cell ?: "")
+        InfoRow(label = "Phone:", value = user.phone ?: "")
+        InfoRow(label = "Cell:", value = user.cell ?: "")
     }
 }
 
 @Composable
 private fun EmailTab(user: User) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        InfoRow(label = "Email", value = user.email ?: "")
+        InfoRow(label = "Email:", value = user.email ?: "")
     }
 }
 
@@ -318,12 +316,12 @@ private fun LocationTab(user: User) {
     ).joinToString(", ")
 
     Column(
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        InfoRow(label = "Country", value = user.country ?: "")
-        InfoRow(label = "City", value = user.city ?: "")
-        InfoRow(label = "Street", value = user.street ?: "")
-        InfoRow(label = "Full address", value = location)
+        InfoRow(label = "Country:", value = user.country ?: "")
+        InfoRow(label = "City:", value = user.city ?: "")
+        InfoRow(label = "Street:", value = user.street ?: "")
+        InfoRow(label = "Full address:", value = location)
     }
 }
 
@@ -335,12 +333,16 @@ private fun InfoRow(label: String, value: String) {
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = Color.Gray
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.primary,
+            fontWeight = FontWeight.Bold,
         )
+        Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = value,
-            style = MaterialTheme.typography.bodyMedium
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.weight(1f)
         )
     }
 }

@@ -1,16 +1,13 @@
 package com.example.randomuser.presentation
 
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.rememberNavController
 import com.example.randomuser.presentation.navigation.RandomUserNavGraph
+import com.example.randomuser.presentation.theme.RandomUserTheme
 
 @Composable
 fun RandomUserApp() {
-    MaterialTheme(
-        colorScheme = lightColorScheme(),
-    ) {
+    RandomUserTheme {
         val navController = rememberNavController()
         RandomUserNavGraph(navController)
     }

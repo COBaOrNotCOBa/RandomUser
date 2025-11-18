@@ -47,9 +47,7 @@ fun RandomUserNavGraph(
             route = Screen.UserDetails.route,
             arguments = listOf(navArgument("userId") { type = NavType.StringType })
         ) { backStackEntry ->
-            val userId = backStackEntry.arguments?.getString("userId") ?: ""
             UserDetailsScreen(
-                userId = userId,
                 onBackClick = { navController.popBackStack() }
             )
         }

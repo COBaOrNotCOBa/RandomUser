@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -32,8 +33,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.randomuser.domain.model.User
+import com.example.randomuser.presentation.model.UiState
+import com.example.randomuser.presentation.preview.sampleUsers
+import com.example.randomuser.presentation.theme.RandomUserTheme
+import com.example.randomuser.presentation.userlist.UserListScreenContent
 import com.example.randomuser.presentation.userlist.natToFlagEmoji
 
 @Composable
@@ -52,16 +59,15 @@ fun UserListItem(
     ) {
         Row(
             modifier = Modifier
-                .padding(12.dp)
+                .padding(6.dp)
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // фото
             AsyncImage(
                 model = user.pictureUrl,
                 contentDescription = null,
                 modifier = Modifier
-                    .size(64.dp)
+                    .size(98.dp)
                     .clip(RoundedCornerShape(12.dp)),
                 contentScale = ContentScale.Crop
             )
@@ -74,8 +80,11 @@ fun UserListItem(
                 Text(
                     text = user.fullName,
                     style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold,
                 )
+
+                Spacer(modifier = Modifier.height(8.dp))
 
                 user.phone?.let {
                     Text(
@@ -85,6 +94,8 @@ fun UserListItem(
                     )
                 }
 
+                Spacer(modifier = Modifier.height(8.dp))
+
                 val natCode = user.nat ?: ""
                 val flag = natToFlagEmoji(natCode)
                 if (natCode.isNotBlank()) {
@@ -93,19 +104,19 @@ fun UserListItem(
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         Text(
+                            text = flag,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                        Text(
                             text = natCode,
                             style = MaterialTheme.typography.bodySmall,
                             color = Color.Gray
-                        )
-                        Text(
-                            text = flag,
-                            style = MaterialTheme.typography.bodySmall
                         )
                     }
                 }
             }
 
-            Box {
+            Box(modifier = Modifier.align(Alignment.Top)) {
                 var menuExpanded by remember { mutableStateOf(false) }
 
                 IconButton(onClick = { menuExpanded = true }) {
@@ -129,5 +140,17 @@ fun UserListItem(
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun UserListScreenPreview_Success() {
+    RandomUserTheme {
+        UserListScreenContent(
+            state = UiState.Success(sampleUsers),
+            onCreateUserClick = {},
+            onUserClick = {}
+        )
     }
 }
