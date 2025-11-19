@@ -1,7 +1,6 @@
 package com.example.randomuser.presentation.components
 
 import androidx.compose.foundation.clickable
-import coil3.compose.AsyncImage
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,14 +30,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
 import com.example.randomuser.domain.model.User
 import com.example.randomuser.presentation.model.UiState
+import com.example.randomuser.presentation.preview.DevicePreviews
 import com.example.randomuser.presentation.preview.sampleUsers
+import com.example.randomuser.presentation.theme.GrayText
 import com.example.randomuser.presentation.theme.RandomUserTheme
 import com.example.randomuser.presentation.userlist.UserListScreenContent
 import com.example.randomuser.presentation.userlist.natToFlagEmoji
@@ -55,7 +54,10 @@ fun UserListItem(
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .clickable(onClick = onClick),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        shape = RoundedCornerShape(16.dp)
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     ) {
         Row(
             modifier = Modifier
@@ -81,7 +83,6 @@ fun UserListItem(
                     text = user.fullName,
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold,
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -90,7 +91,7 @@ fun UserListItem(
                     Text(
                         text = it,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = Color.Gray
+                        color = GrayText
                     )
                 }
 
@@ -110,13 +111,13 @@ fun UserListItem(
                         Text(
                             text = natCode,
                             style = MaterialTheme.typography.bodySmall,
-                            color = Color.Gray
+                            color = GrayText
                         )
                     }
                 }
             }
 
-            Box(modifier = Modifier.align(Alignment.Top)) {
+            Box(contentAlignment = Alignment.TopEnd) {
                 var menuExpanded by remember { mutableStateOf(false) }
 
                 IconButton(onClick = { menuExpanded = true }) {
@@ -143,14 +144,15 @@ fun UserListItem(
     }
 }
 
-@Preview(showBackground = true)
+@DevicePreviews
 @Composable
 fun UserListScreenPreview_Success() {
     RandomUserTheme {
         UserListScreenContent(
             state = UiState.Success(sampleUsers),
             onCreateUserClick = {},
-            onUserClick = {}
+            onUserClick = {},
+            onDeleteUserClick = {},
         )
     }
 }

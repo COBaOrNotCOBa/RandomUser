@@ -8,7 +8,7 @@ data class User(
     val phone: String?,
     val cell: String?,
     val age: Int?,
-    val date: String?,
+    val dateOfBirth: String?,
     val country: String?,
     val city: String?,
     val street: String?,

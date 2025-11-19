@@ -1,6 +1,7 @@
 package com.example.randomuser.di
 
 import com.example.randomuser.domain.repository.UserRepository
+import com.example.randomuser.domain.usecase.DeleteUserUseCase
 import com.example.randomuser.domain.usecase.GetRandomUserUseCase
 import com.example.randomuser.domain.usecase.GetUserByIdUseCase
 import com.example.randomuser.domain.usecase.GetUsersUseCase
@@ -24,4 +25,8 @@ object UseCaseModule {
     @Provides
     fun provideGetUserByIdUseCase(repository: UserRepository) =
         GetUserByIdUseCase(repository)
+
+    @Provides
+    fun provideDeleteUserUseCase(repository: UserRepository): DeleteUserUseCase =
+        DeleteUserUseCase(repository)
 }

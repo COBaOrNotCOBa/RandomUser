@@ -7,8 +7,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.randomuser.presentation.details.UserDetailsScreen
 import com.example.randomuser.presentation.createuser.CreateUserScreen
+import com.example.randomuser.presentation.details.UserDetailsScreen
 import com.example.randomuser.presentation.userlist.UserListScreen
 
 @Composable

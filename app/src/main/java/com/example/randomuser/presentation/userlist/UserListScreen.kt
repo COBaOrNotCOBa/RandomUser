@@ -24,12 +24,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.randomuser.domain.model.User
 import com.example.randomuser.presentation.components.UserListItem
 import com.example.randomuser.presentation.model.UiState
+import com.example.randomuser.presentation.preview.DevicePreviews
 import com.example.randomuser.presentation.preview.sampleUsers
 import com.example.randomuser.presentation.theme.RandomUserTheme
 
@@ -38,7 +38,7 @@ fun UserListScreen(
     viewModel: UserListViewModel = hiltViewModel(),
     onCreateUserClick: () -> Unit,
     onUserClick: (String) -> Unit,
-    onRequestCreateFirstUser: () -> Unit
+    onRequestCreateFirstUser: () -> Unit,
 ) {
     val state by viewModel.uiState.collectAsState()
 
@@ -51,7 +51,8 @@ fun UserListScreen(
     UserListScreenContent(
         state = state,
         onCreateUserClick = onCreateUserClick,
-        onUserClick = onUserClick
+        onUserClick = onUserClick,
+        onDeleteUserClick = viewModel::onDeleteUser,
     )
 }
 
@@ -60,9 +61,10 @@ fun UserListScreen(
 fun UserListScreenContent(
     state: UiState<List<User>>,
     onCreateUserClick: () -> Unit,
-    onUserClick: (String) -> Unit
+    onUserClick: (String) -> Unit,
+    onDeleteUserClick: (String) -> Unit,
 ) {
-    Scaffold() { padding ->
+    Scaffold { padding ->
         Box(
             modifier = Modifier
                 .padding(padding)
@@ -97,9 +99,7 @@ fun UserListScreenContent(
                             UserListItem(
                                 user = user,
                                 onClick = { onUserClick(user.id) },
-                                onMenuClick = {
-                                    // TODO: delete user через VM
-                                }
+                                onMenuClick = { onDeleteUserClick(user.id) }
                             )
                         }
                     }
@@ -132,26 +132,28 @@ fun UserListScreenContent(
     }
 }
 
-@Preview(showBackground = true)
+@DevicePreviews
 @Composable
 fun UserListScreenPreview_Success() {
     RandomUserTheme {
         UserListScreenContent(
             state = UiState.Success(sampleUsers),
             onCreateUserClick = {},
-            onUserClick = {}
+            onUserClick = {},
+            onDeleteUserClick = {},
         )
     }
 }
 
-@Preview(showBackground = true)
+@DevicePreviews
 @Composable
 fun UserListScreenPreview_Empty() {
     RandomUserTheme {
         UserListScreenContent(
             state = UiState.Empty("You have not created any users yet"),
             onCreateUserClick = {},
-            onUserClick = {}
+            onUserClick = {},
+            onDeleteUserClick = {},
         )
     }
 }

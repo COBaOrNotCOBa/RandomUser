@@ -7,16 +7,16 @@ import com.example.randomuser.domain.model.User
 import com.example.randomuser.domain.usecase.GetUserByIdUseCase
 import com.example.randomuser.presentation.model.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import jakarta.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import javax.inject.Inject
 
 @HiltViewModel
 class UserDetailsViewModel @Inject constructor(
-    private val getUserByIdUseCase: GetUserByIdUseCase,
+    getUserByIdUseCase: GetUserByIdUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 

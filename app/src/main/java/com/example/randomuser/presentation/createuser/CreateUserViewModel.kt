@@ -9,8 +9,8 @@ import com.example.randomuser.domain.model.User
 import com.example.randomuser.domain.usecase.GetRandomUserUseCase
 import com.example.randomuser.presentation.model.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import jakarta.inject.Inject
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
 class CreateUserViewModel @Inject constructor(

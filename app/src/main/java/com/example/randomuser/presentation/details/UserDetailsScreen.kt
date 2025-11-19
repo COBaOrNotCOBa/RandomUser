@@ -35,8 +35,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,18 +46,20 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil3.compose.AsyncImage
 import com.example.randomuser.domain.model.User
 import com.example.randomuser.presentation.model.UiState
+import com.example.randomuser.presentation.preview.DevicePreviews
 import com.example.randomuser.presentation.preview.sampleUser
+import com.example.randomuser.presentation.preview.sampleUsers
+import com.example.randomuser.presentation.theme.AppColors
+import com.example.randomuser.presentation.theme.AppTextStyles
 import com.example.randomuser.presentation.theme.RandomUserTheme
 
 @Composable
 fun UserDetailsScreen(
-//    userId: String,
     viewModel: UserDetailsViewModel = hiltViewModel(),
     onBackClick: () -> Unit
 ) {
@@ -106,13 +109,15 @@ private fun UserDetailsContent(
     user: User,
     onBackClick: () -> Unit
 ) {
-    var selectedTab by remember { mutableStateOf(0) }
+    var selectedTab by rememberSaveable { mutableIntStateOf(0) }
 
-    val gradientColors = listOf(
-        Color(0xFFBBDEFB),
-        Color(0xFF2196F3),
-        Color(0xFF0D47A1)
-    )
+    val gradientColors = remember(user.gender) {
+        if (user.gender?.lowercase() == "female") {
+            AppColors.FemaleGradient
+        } else {
+            AppColors.MaleGradient
+        }
+    }
 
     Column(
         modifier = Modifier.fillMaxSize()
@@ -284,7 +289,7 @@ private fun UserInfoTab(user: User) {
         InfoRow(label = "Last name:", value = user.fullName.split(" ").lastOrNull() ?: "")
         InfoRow(label = "Gender:", value = user.gender ?: "")
         InfoRow(label = "Age:", value = user.age?.toString() ?: "")
-        InfoRow(label = "Date of birth:", value = user.date?.substringBefore("T") ?: "")
+        InfoRow(label = "Date of birth:", value = user.dateOfBirth?.substringBefore("T") ?: "")
     }
 }
 
@@ -333,26 +338,38 @@ private fun InfoRow(label: String, value: String) {
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.primary,
-            fontWeight = FontWeight.Bold,
+            style = AppTextStyles.InfoLabel,
+            color = MaterialTheme.colorScheme.primary
         )
+
         Spacer(modifier = Modifier.width(8.dp))
+
         Text(
             text = value,
-            style = MaterialTheme.typography.bodyLarge,
+            style = AppTextStyles.InfoValue,
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.weight(1f)
         )
     }
 }
 
-@Preview(showBackground = true)
+@DevicePreviews
+@Composable
+fun UserDetailsScreenPreviewMale() {
+    RandomUserTheme {
+        UserDetailsContent(
+            user = sampleUser,
+            onBackClick = {}
+        )
+    }
+}
+
+@DevicePreviews
 @Composable
 fun UserDetailsScreenPreview() {
     RandomUserTheme {
         UserDetailsContent(
-            user = sampleUser,
+            user = sampleUsers[1],
             onBackClick = {}
         )
     }

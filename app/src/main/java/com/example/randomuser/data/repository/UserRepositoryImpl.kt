@@ -1,16 +1,16 @@
 package com.example.randomuser.data.repository
 
 import com.example.randomuser.data.local.UserDao
-import com.example.randomuser.data.mapper.toEntity
 import com.example.randomuser.data.mapper.toDomain
+import com.example.randomuser.data.mapper.toEntity
 import com.example.randomuser.data.remote.RandomUserApi
 import com.example.randomuser.domain.model.User
 import com.example.randomuser.domain.repository.UserRepository
-import jakarta.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import retrofit2.HttpException
 import java.io.IOException
+import javax.inject.Inject
 
 class UserRepositoryImpl @Inject constructor(
     private val api: RandomUserApi,
@@ -34,8 +34,7 @@ class UserRepositoryImpl @Inject constructor(
 
             Result.success(entity.toDomain())
         } catch (e: HttpException) {
-            val msg = "Server error: ${e.code()}"
-            Result.failure(Exception(msg, e))
+            Result.failure(Exception("Server error: ${e.code()}", e))
         } catch (e: IOException) {
             Result.failure(Exception("Network error. Check your connection.", e))
         } catch (e: Exception) {
@@ -50,4 +49,8 @@ class UserRepositoryImpl @Inject constructor(
     override fun getUserById(id: String): Flow<User?> =
         userDao.getUserById(id)
             .map { it?.toDomain() }
+
+    override suspend fun deleteUser(id: String) {
+        userDao.deleteUser(id)
+    }
 }

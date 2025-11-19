@@ -13,13 +13,13 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -28,13 +28,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.example.randomuser.domain.model.User
 import com.example.randomuser.presentation.components.RandomUserTopBar
 import com.example.randomuser.presentation.model.UiState
+import com.example.randomuser.presentation.preview.DevicePreviews
+import com.example.randomuser.presentation.theme.AppTextStyles
 import com.example.randomuser.presentation.theme.RandomUserTheme
 
 @Composable
@@ -63,14 +63,13 @@ fun CreateUserScreenContent(
     onGenderSelected: (String?) -> Unit,
     onNatSelected: (String?) -> Unit,
     onGenerateClick: () -> Unit,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
 ) {
     Scaffold(
         topBar = {
             RandomUserTopBar(
                 title = "Generate User",
-                canNavigateBack = true,
-                onBackClick = onBackClick
+                onBackClick = onBackClick,
             )
         }
     ) { padding ->
@@ -90,8 +89,7 @@ fun CreateUserScreenContent(
                 Text(
                     text = "Select Gender:",
                     color = MaterialTheme.colorScheme.primary,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Bold,
+                    style = AppTextStyles.SectionTitle
                 )
 
                 Spacer(Modifier.height(8.dp))
@@ -144,13 +142,15 @@ fun CreateUserScreenContent(
                 Text(
                     text = "Select Nationality:",
                     color = MaterialTheme.colorScheme.primary,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Bold,
+                    style = AppTextStyles.SectionTitle
                 )
 
                 Spacer(Modifier.height(8.dp))
 
-                val natOptions = listOf("Any", "US", "GB", "DE", "FR", "AU")
+                val natOptions = listOf(
+                    "Any", "AU", "BR", "CA", "CH", "DE", "DK", "ES", "FI", "FR", "GB",
+                    "IE", "IN", "IR", "MX", "NL", "NO", "NZ", "RS", "TR", "UA", "US"
+                )
                 var natExpanded by remember { mutableStateOf(false) }
 
                 ExposedDropdownMenuBox(
@@ -232,7 +232,7 @@ fun CreateUserScreenContent(
     }
 }
 
-@Preview(showBackground = true, showSystemUi = false)
+@DevicePreviews
 @Composable
 fun CreateUserScreenPreview_Idle() {
     RandomUserTheme {
@@ -248,7 +248,7 @@ fun CreateUserScreenPreview_Idle() {
     }
 }
 
-@Preview(showBackground = true)
+@DevicePreviews
 @Composable
 fun CreateUserScreenPreview_Error() {
     RandomUserTheme {

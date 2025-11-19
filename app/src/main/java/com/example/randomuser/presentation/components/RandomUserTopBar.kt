@@ -15,7 +15,6 @@ import androidx.compose.ui.text.font.FontWeight
 @Composable
 fun RandomUserTopBar(
     title: String,
-    canNavigateBack: Boolean,
     onBackClick: (() -> Unit)? = null
 ) {
     CenterAlignedTopAppBar(
@@ -27,7 +26,7 @@ fun RandomUserTopBar(
             )
         },
         navigationIcon = {
-            if (canNavigateBack && onBackClick != null) {
+            if (onBackClick != null) {
                 IconButton(onClick = onBackClick) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,

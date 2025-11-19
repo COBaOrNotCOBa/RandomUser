@@ -12,4 +12,6 @@ interface UserRepository {
     fun getUsers(): Flow<List<User>>
 
     fun getUserById(id: String): Flow<User?>
+
+    suspend fun deleteUser(id: String)
 }
