@@ -34,12 +34,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.example.randomuser.domain.model.User
-import com.example.randomuser.presentation.model.UiState
-import com.example.randomuser.presentation.preview.DevicePreviews
-import com.example.randomuser.presentation.preview.sampleUsers
 import com.example.randomuser.presentation.theme.GrayText
-import com.example.randomuser.presentation.theme.RandomUserTheme
-import com.example.randomuser.presentation.userlist.UserListScreenContent
 import com.example.randomuser.presentation.userlist.natToFlagEmoji
 
 @Composable
@@ -141,18 +136,5 @@ fun UserListItem(
                 }
             }
         }
-    }
-}
-
-@DevicePreviews
-@Composable
-fun UserListScreenPreview_Success() {
-    RandomUserTheme {
-        UserListScreenContent(
-            state = UiState.Success(sampleUsers),
-            onCreateUserClick = {},
-            onUserClick = {},
-            onDeleteUserClick = {},
-        )
     }
 }

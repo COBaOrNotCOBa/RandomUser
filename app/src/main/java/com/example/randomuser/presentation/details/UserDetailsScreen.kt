@@ -45,6 +45,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -72,7 +73,8 @@ fun UserDetailsScreen(
                 .fillMaxSize()
         ) {
             when (val s = state) {
-                is UiState.Loading -> {
+                is UiState.Loading,
+                UiState.Idle -> {
                     CircularProgressIndicator(Modifier.align(Alignment.Center))
                 }
 
@@ -97,8 +99,6 @@ fun UserDetailsScreen(
                         onBackClick = onBackClick
                     )
                 }
-
-                UiState.Idle -> Unit
             }
         }
     }
@@ -110,6 +110,7 @@ private fun UserDetailsContent(
     onBackClick: () -> Unit
 ) {
     var selectedTab by rememberSaveable { mutableIntStateOf(0) }
+    val isPreview = LocalInspectionMode.current
 
     val gradientColors = remember(user.gender) {
         if (user.gender?.lowercase() == "female") {
@@ -219,16 +220,35 @@ private fun UserDetailsContent(
                 }
             }
 
-            AsyncImage(
-                model = user.pictureUrl,
-                contentDescription = null,
-                modifier = Modifier
-                    .size(140.dp)
-                    .align(Alignment.TopCenter)
-                    .offset(y = (-70).dp)
-                    .clip(CircleShape),
-                contentScale = ContentScale.Crop
-            )
+            if (isPreview) {
+                Box(
+                    modifier = Modifier
+                        .size(140.dp)
+                        .align(Alignment.TopCenter)
+                        .offset(y = (-70).dp)
+                        .clip(CircleShape)
+                        .background(Color.LightGray),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(64.dp)
+                    )
+                }
+            } else {
+                AsyncImage(
+                    model = user.pictureUrl,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(140.dp)
+                        .align(Alignment.TopCenter)
+                        .offset(y = (-70).dp)
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Crop
+                )
+            }
         }
     }
 }
