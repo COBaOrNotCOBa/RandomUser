@@ -34,7 +34,7 @@ class UserDetailsViewModel @Inject constructor(
             .catch { emit(UiState.Error(it.message ?: "Error loading user")) }
             .stateIn(
                 scope = viewModelScope,
-                started = SharingStarted.Lazily,
+                started = SharingStarted.WhileSubscribed(5_000L),
                 initialValue = UiState.Loading
             )
 }

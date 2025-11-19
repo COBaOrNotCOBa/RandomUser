@@ -166,7 +166,6 @@ private fun UserDetailsContent(
                     text = "I'm",
                     color = Color.Gray,
                     style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Bold,
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
 

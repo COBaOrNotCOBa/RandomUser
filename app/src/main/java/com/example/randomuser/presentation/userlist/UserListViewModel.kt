@@ -32,7 +32,7 @@ class UserListViewModel @Inject constructor(
         .catch { emit(UiState.Error(it.message ?: "Error loading users")) }
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.Lazily,
+            started = SharingStarted.WhileSubscribed(5_000L),
             initialValue = UiState.Loading
         )
 
