@@ -19,7 +19,8 @@ private val DarkColorScheme = darkColorScheme(
 private val LightColorScheme = lightColorScheme(
     primary = BluePrimary,
     secondary = BlueDark,
-    tertiary = PinkPrimary
+    tertiary = PinkPrimary,
+    onSurfaceVariant = GrayText
 )
 
 @Composable

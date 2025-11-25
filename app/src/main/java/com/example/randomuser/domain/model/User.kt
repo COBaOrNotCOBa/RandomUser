@@ -13,5 +13,5 @@ data class User(
     val city: String?,
     val street: String?,
     val pictureUrl: String?,
-    val nat: String?
+    val nationality: String?,
 )

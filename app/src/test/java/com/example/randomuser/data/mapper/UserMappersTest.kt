@@ -79,7 +79,7 @@ class UserMappersTest {
         assertEquals(COUNTRY, entity.country)
         assertEquals(CITY, entity.city)
         assertEquals("$STREET_NAME $STREET_NUMBER", entity.street)
-        assertEquals(NAT, entity.nat)
+        assertEquals(NAT, entity.nationality)
     }
 
     @Test
@@ -97,7 +97,7 @@ class UserMappersTest {
             city = CITY,
             street = "$STREET_NAME $STREET_NUMBER",
             pictureUrl = PICTURE_URL,
-            nat = NAT
+            nationality = NAT
         )
 
         val user = entity.toDomain()
@@ -114,7 +114,7 @@ class UserMappersTest {
         assertEquals(entity.city, user.city)
         assertEquals(entity.street, user.street)
         assertEquals(entity.pictureUrl, user.pictureUrl)
-        assertEquals(entity.nat, user.nat)
+        assertEquals(entity.nationality, user.nationality)
     }
 
     private companion object {

@@ -31,7 +31,7 @@ fun UserDto.toEntity(): UserEntity? {
         city = location?.city,
         street = street.ifBlank { null },
         pictureUrl = picture?.large,
-        nat = nat
+        nationality = nat
     )
 }
 
@@ -49,5 +49,5 @@ fun UserEntity.toDomain(): User =
         city = city,
         street = street,
         pictureUrl = pictureUrl,
-        nat = nat
+        nationality = nationality
     )

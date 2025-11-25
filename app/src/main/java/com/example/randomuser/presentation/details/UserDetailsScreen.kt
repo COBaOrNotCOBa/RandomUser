@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Person
@@ -28,7 +27,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -46,11 +44,14 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import coil3.compose.AsyncImage
+import com.example.randomuser.R
 import com.example.randomuser.domain.model.User
+import com.example.randomuser.presentation.components.BackIconButton
 import com.example.randomuser.presentation.model.UiState
 import com.example.randomuser.presentation.preview.DevicePreviews
 import com.example.randomuser.presentation.preview.sampleUser
@@ -64,7 +65,7 @@ fun UserDetailsScreen(
     viewModel: UserDetailsViewModel = hiltViewModel(),
     onBackClick: () -> Unit
 ) {
-    val state by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
 
     Scaffold { padding ->
         Box(
@@ -72,7 +73,7 @@ fun UserDetailsScreen(
                 .padding(padding)
                 .fillMaxSize()
         ) {
-            when (val s = state) {
+            when (val state = uiState) {
                 is UiState.Loading,
                 UiState.Idle -> {
                     CircularProgressIndicator(Modifier.align(Alignment.Center))
@@ -80,7 +81,7 @@ fun UserDetailsScreen(
 
                 is UiState.Error -> {
                     Text(
-                        text = s.message,
+                        text = state.message,
                         color = MaterialTheme.colorScheme.error,
                         modifier = Modifier.align(Alignment.Center)
                     )
@@ -88,14 +89,14 @@ fun UserDetailsScreen(
 
                 is UiState.Empty -> {
                     Text(
-                        text = s.message,
+                        text = state.message,
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }
 
                 is UiState.Success -> {
                     UserDetailsContent(
-                        user = s.data,
+                        user = state.data,
                         onBackClick = onBackClick
                     )
                 }
@@ -131,19 +132,11 @@ private fun UserDetailsContent(
                     Brush.horizontalGradient(gradientColors)
                 )
         ) {
-            IconButton(
+            BackIconButton(
                 onClick = onBackClick,
                 modifier = Modifier
                     .padding(16.dp)
-                    .size(36.dp)
-                    .background(Color.White, CircleShape)
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    tint = MaterialTheme.colorScheme.primary
-                )
-            }
+            )
         }
 
         Box(
@@ -157,14 +150,14 @@ private fun UserDetailsContent(
                 Spacer(Modifier.height(75.dp))
 
                 Text(
-                    text = "Hi how are you today?",
+                    text = stringResource(R.string.details_greeting),
                     color = Color.Gray,
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
 
                 Text(
-                    text = "I'm",
+                    text = stringResource(R.string.details_im),
                     color = Color.Gray,
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -301,33 +294,51 @@ private fun DetailsTabsHeader(
 
 @Composable
 private fun UserInfoTab(user: User) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        InfoRow(label = "First name:", value = user.fullName.split(" ").getOrNull(1) ?: "")
-        InfoRow(label = "Last name:", value = user.fullName.split(" ").lastOrNull() ?: "")
-        InfoRow(label = "Gender:", value = user.gender ?: "")
-        InfoRow(label = "Age:", value = user.age?.toString() ?: "")
-        InfoRow(label = "Date of birth:", value = user.dateOfBirth?.substringBefore("T") ?: "")
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        InfoRow(
+            label = stringResource(R.string.details_first_name),
+            value = user.fullName.split(" ").getOrNull(1) ?: ""
+        )
+        InfoRow(
+            label = stringResource(R.string.details_last_name),
+            value = user.fullName.split(" ").lastOrNull() ?: ""
+        )
+        InfoRow(
+            label = stringResource(R.string.details_gender),
+            value = user.gender.orEmpty()
+        )
+        InfoRow(
+            label = stringResource(R.string.details_age),
+            value = user.age?.toString().orEmpty()
+        )
+        InfoRow(
+            label = stringResource(R.string.details_date_of_birth),
+            value = user.dateOfBirth?.substringBefore("T").orEmpty()
+        )
     }
 }
 
 @Composable
 private fun PhoneTab(user: User) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        InfoRow(label = "Phone:", value = user.phone ?: "")
-        InfoRow(label = "Cell:", value = user.cell ?: "")
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        InfoRow(
+            label = stringResource(R.string.details_phone),
+            value = user.phone.orEmpty()
+        )
+        InfoRow(
+            label = stringResource(R.string.details_cell),
+            value = user.cell.orEmpty()
+        )
     }
 }
 
 @Composable
 private fun EmailTab(user: User) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        InfoRow(label = "Email:", value = user.email ?: "")
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        InfoRow(
+            label = stringResource(R.string.details_email),
+            value = user.email.orEmpty()
+        )
     }
 }
 
@@ -339,13 +350,23 @@ private fun LocationTab(user: User) {
         user.street
     ).joinToString(", ")
 
-    Column(
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        InfoRow(label = "Country:", value = user.country ?: "")
-        InfoRow(label = "City:", value = user.city ?: "")
-        InfoRow(label = "Street:", value = user.street ?: "")
-        InfoRow(label = "Full address:", value = location)
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        InfoRow(
+            label = stringResource(R.string.details_country),
+            value = user.country.orEmpty()
+        )
+        InfoRow(
+            label = stringResource(R.string.details_city),
+            value = user.city.orEmpty()
+        )
+        InfoRow(
+            label = stringResource(R.string.details_street),
+            value = user.street.orEmpty()
+        )
+        InfoRow(
+            label = stringResource(R.string.details_full_address),
+            value = location
+        )
     }
 }
 

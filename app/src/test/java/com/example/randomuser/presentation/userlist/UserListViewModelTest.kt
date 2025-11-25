@@ -3,6 +3,7 @@ package com.example.randomuser.presentation.userlist
 import com.example.randomuser.domain.model.User
 import com.example.randomuser.domain.usecase.DeleteUserUseCase
 import com.example.randomuser.domain.usecase.GetUsersUseCase
+import com.example.randomuser.fakes.FakeStringProvider
 import com.example.randomuser.fakes.FakeUserRepository
 import com.example.randomuser.presentation.model.UiState
 import com.example.randomuser.util.MainDispatcherRule
@@ -92,9 +93,12 @@ class UserListViewModelTest {
     private fun createViewModel(repository: FakeUserRepository): UserListViewModel {
         val getUsersUseCase = GetUsersUseCase(repository)
         val deleteUserUseCase = DeleteUserUseCase(repository)
+        val stringProvider = FakeStringProvider()
+
         return UserListViewModel(
             getUsersUseCase = getUsersUseCase,
-            deleteUserUseCase = deleteUserUseCase
+            deleteUserUseCase = deleteUserUseCase,
+            stringProvider = stringProvider,
         )
     }
 
@@ -112,7 +116,7 @@ class UserListViewModelTest {
             city = CITY,
             street = STREET,
             pictureUrl = PICTURE_URL,
-            nat = NAT
+            nationality = NAT
         )
 
     private companion object {

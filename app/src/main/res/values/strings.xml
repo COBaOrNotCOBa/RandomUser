@@ -1,3 +1,69 @@
 <resources>
     <string name="app_name">RandomUser</string>
+
+    <string name="title_user_list">Users</string>
+    <string name="title_generate_user">Generate User</string>
+
+    <string name="label_select_gender">Select Gender:</string>
+    <string name="label_select_nationality">Select Nationality:</string>
+
+    <string name="gender_any">Any</string>
+    <string name="gender_male">Male</string>
+    <string name="gender_female">Female</string>
+
+    <string name="nationality_any">Any</string>
+    <string name="nationality_au">AU</string>
+    <string name="nationality_br">BR</string>
+    <string name="nationality_ca">CA</string>
+    <string name="nationality_ch">CH</string>
+    <string name="nationality_de">DE</string>
+    <string name="nationality_dk">DK</string>
+    <string name="nationality_es">ES</string>
+    <string name="nationality_fi">FI</string>
+    <string name="nationality_fr">FR</string>
+    <string name="nationality_gb">GB</string>
+    <string name="nationality_ie">IE</string>
+    <string name="nationality_in">IN</string>
+    <string name="nationality_ir">IR</string>
+    <string name="nationality_mx">MX</string>
+    <string name="nationality_nl">NL</string>
+    <string name="nationality_no">NO</string>
+    <string name="nationality_nz">NZ</string>
+    <string name="nationality_rs">RS</string>
+    <string name="nationality_tr">TR</string>
+    <string name="nationality_ua">UA</string>
+    <string name="nationality_us">US</string>
+
+    <string name="button_generate">GENERATE</string>
+
+    <string name="details_title_user">""</string>
+    <string name="details_greeting">Hi how are you today?</string>
+    <string name="details_im">I am</string>
+
+    <string name="details_first_name">First name:</string>
+    <string name="details_last_name">Last name:</string>
+    <string name="details_gender">Gender:</string>
+    <string name="details_age">Age:</string>
+    <string name="details_date_of_birth">Date of birth:</string>
+
+    <string name="details_phone">Phone:</string>
+    <string name="details_cell">Cell:</string>
+    <string name="details_email">Email:</string>
+
+    <string name="details_country">Country:</string>
+    <string name="details_city">City:</string>
+    <string name="details_street">Street:</string>
+    <string name="details_full_address">Full address:</string>
+
+    <string name="list_empty_message">You have not created any users yet</string>
+
+    <string name="content_description_back">Back</string>
+    <string name="content_description_more">More options</string>
+    <string name="menu_delete">Delete</string>
+
+    <string name="error_loading_users">Error loading users</string>
+    <string name="error_loading_user">Error loading user</string>
+    <string name="error_user_not_found">User not found</string>
+    <string name="error_generating_user">Failed to load user</string>
+
 </resources>

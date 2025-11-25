@@ -3,21 +3,21 @@ package com.example.randomuser.presentation.userlist
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-class NatToFlagEmojiTest {
+class NationalityToFlagEmojiTest {
 
     @Test
     fun `returns correct flag for all supported nat codes`() {
         EXPECTATIONS.forEach { (code, flag) ->
-            assertEquals(flag, natToFlagEmoji(code))
-            assertEquals(flag, natToFlagEmoji(code.lowercase()))
+            assertEquals(flag, nationalityToFlagEmoji(code))
+            assertEquals(flag, nationalityToFlagEmoji(code.lowercase()))
         }
     }
 
     @Test
     fun `returns default flag for unknown or null nat`() {
-        assertEquals(DEFAULT_FLAG, natToFlagEmoji(null))
-        assertEquals(DEFAULT_FLAG, natToFlagEmoji(""))
-        assertEquals(DEFAULT_FLAG, natToFlagEmoji("XX"))
+        assertEquals(DEFAULT_FLAG, nationalityToFlagEmoji(null))
+        assertEquals(DEFAULT_FLAG, nationalityToFlagEmoji(""))
+        assertEquals(DEFAULT_FLAG, nationalityToFlagEmoji("XX"))
     }
 
     private companion object {

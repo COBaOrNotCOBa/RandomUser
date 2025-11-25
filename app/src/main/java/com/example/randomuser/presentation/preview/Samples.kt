@@ -15,7 +15,7 @@ val sampleUser = User(
     city = "London",
     street = "221B Baker Street",
     pictureUrl = "https://randomuser.me/api/portraits/men/75.jpg",
-    nat = "GB"
+    nationality = "GB"
 )
 
 val sampleUsers = listOf(
@@ -25,7 +25,7 @@ val sampleUsers = listOf(
         fullName = "Emma Smith",
         gender = "female",
         email = "emma.smith@example.com",
-        nat = "US",
+        nationality = "US",
         country = "United States",
         city = "New York"
     )

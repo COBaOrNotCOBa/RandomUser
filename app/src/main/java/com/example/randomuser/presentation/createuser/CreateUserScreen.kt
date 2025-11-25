@@ -28,8 +28,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.randomuser.R
+import com.example.randomuser.domain.model.NationalityOptions
+import com.example.randomuser.presentation.model.Gender
 import com.example.randomuser.domain.model.User
 import com.example.randomuser.presentation.components.RandomUserTopBar
 import com.example.randomuser.presentation.model.UiState
@@ -41,16 +46,18 @@ import com.example.randomuser.presentation.theme.RandomUserTheme
 fun CreateUserScreen(
     viewModel: CreateUserViewModel = hiltViewModel(),
     onBackClick: () -> Unit,
-    onUserCreated: (String) -> Unit
+    onUserCreated: (String) -> Unit,
 ) {
+    val state = viewModel.uiState.collectAsStateWithLifecycle().value
+
     CreateUserScreenContent(
-        uiState = viewModel.uiState,
-        selectedGender = viewModel.selectedGender,
-        selectedNat = viewModel.selectedNat,
+        uiState = state.requestState,
+        selectedGender = state.gender,
+        selectedNationality = state.nationality,
         onGenderSelected = viewModel::onGenderSelected,
-        onNatSelected = viewModel::onNatSelected,
+        onNationalitySelected = viewModel::onNationalitySelected,
         onGenerateClick = { viewModel.generateUser(onUserCreated) },
-        onBackClick = onBackClick
+        onBackClick = onBackClick,
     )
 }
 
@@ -58,17 +65,17 @@ fun CreateUserScreen(
 @Composable
 fun CreateUserScreenContent(
     uiState: UiState<User>,
-    selectedGender: String?,
-    selectedNat: String?,
-    onGenderSelected: (String?) -> Unit,
-    onNatSelected: (String?) -> Unit,
+    selectedGender: Gender,
+    selectedNationality: String?,
+    onGenderSelected: (Gender) -> Unit,
+    onNationalitySelected: (String?) -> Unit,
     onGenerateClick: () -> Unit,
     onBackClick: () -> Unit,
 ) {
     Scaffold(
         topBar = {
             RandomUserTopBar(
-                title = "Generate User",
+                title = stringResource(R.string.title_generate_user),
                 onBackClick = onBackClick,
             )
         }
@@ -87,15 +94,17 @@ fun CreateUserScreenContent(
                 Spacer(Modifier.height(24.dp))
 
                 Text(
-                    text = "Select Gender:",
+                    text = stringResource(R.string.label_select_gender),
                     color = MaterialTheme.colorScheme.primary,
                     style = AppTextStyles.SectionTitle
                 )
 
                 Spacer(Modifier.height(8.dp))
 
-                val genderOptions = listOf("Any", "Male", "Female")
+                val genderOptions = remember { Gender.entries }
                 var genderExpanded by remember { mutableStateOf(false) }
+
+                val selectedGenderLabel = stringResource(selectedGender.labelResId)
 
                 ExposedDropdownMenuBox(
                     expanded = genderExpanded,
@@ -103,11 +112,7 @@ fun CreateUserScreenContent(
                 ) {
                     OutlinedTextField(
                         readOnly = true,
-                        value = when (selectedGender) {
-                            "male" -> "Male"
-                            "female" -> "Female"
-                            else -> "Any"
-                        },
+                        value = selectedGenderLabel,
                         onValueChange = {},
                         trailingIcon = {
                             ExposedDropdownMenuDefaults.TrailingIcon(expanded = genderExpanded)
@@ -122,14 +127,9 @@ fun CreateUserScreenContent(
                     ) {
                         genderOptions.forEach { option ->
                             DropdownMenuItem(
-                                text = { Text(option) },
+                                text = { Text(stringResource(option.labelResId)) },
                                 onClick = {
-                                    val g = when (option) {
-                                        "Male" -> "male"
-                                        "Female" -> "female"
-                                        else -> null
-                                    }
-                                    onGenderSelected(g)
+                                    onGenderSelected(option)
                                     genderExpanded = false
                                 }
                             )
@@ -140,45 +140,47 @@ fun CreateUserScreenContent(
                 Spacer(Modifier.height(24.dp))
 
                 Text(
-                    text = "Select Nationality:",
+                    text = stringResource(R.string.label_select_nationality),
                     color = MaterialTheme.colorScheme.primary,
                     style = AppTextStyles.SectionTitle
                 )
 
                 Spacer(Modifier.height(8.dp))
 
-                val natOptions = listOf(
-                    "Any", "AU", "BR", "CA", "CH", "DE", "DK", "ES", "FI", "FR", "GB",
-                    "IE", "IN", "IR", "MX", "NL", "NO", "NZ", "RS", "TR", "UA", "US"
-                )
-                var natExpanded by remember { mutableStateOf(false) }
+                val nationalityOptions = remember { NationalityOptions.all }
+                var nationalityExpanded by remember { mutableStateOf(false) }
+
+                val selectedNationalityLabel = nationalityOptions
+                    .firstOrNull { it.code == selectedNationality }
+                    ?.labelResId
+                    ?.let { stringResource(it) }
+                    ?: stringResource(NationalityOptions.default.labelResId)
 
                 ExposedDropdownMenuBox(
-                    expanded = natExpanded,
-                    onExpandedChange = { natExpanded = !natExpanded }
+                    expanded = nationalityExpanded,
+                    onExpandedChange = { nationalityExpanded = !nationalityExpanded }
                 ) {
                     OutlinedTextField(
                         readOnly = true,
-                        value = selectedNat?.uppercase() ?: "Any",
+                        value = selectedNationalityLabel,
                         onValueChange = {},
                         trailingIcon = {
-                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = natExpanded)
+                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = nationalityExpanded)
                         },
                         modifier = Modifier
                             .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                             .fillMaxWidth()
                     )
                     ExposedDropdownMenu(
-                        expanded = natExpanded,
-                        onDismissRequest = { natExpanded = false }
+                        expanded = nationalityExpanded,
+                        onDismissRequest = { nationalityExpanded = false }
                     ) {
-                        natOptions.forEach { nat ->
+                        nationalityOptions.forEach { option ->
                             DropdownMenuItem(
-                                text = { Text(nat) },
+                                text = { Text(stringResource(option.labelResId)) },
                                 onClick = {
-                                    val v = if (nat == "Any") null else nat.lowercase()
-                                    onNatSelected(v)
-                                    natExpanded = false
+                                    onNationalitySelected(option.code)
+                                    nationalityExpanded = false
                                 }
                             )
                         }
@@ -198,7 +200,7 @@ fun CreateUserScreenContent(
                     ),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("GENERATE")
+                    Text(text = stringResource(R.string.button_generate))
                 }
             }
 
@@ -238,10 +240,10 @@ fun CreateUserScreenPreview_Idle() {
     RandomUserTheme {
         CreateUserScreenContent(
             uiState = UiState.Idle,
-            selectedGender = null,
-            selectedNat = null,
+            selectedGender = Gender.ANY,
+            selectedNationality = null,
             onGenderSelected = {},
-            onNatSelected = {},
+            onNationalitySelected = {},
             onGenerateClick = {},
             onBackClick = {}
         )
@@ -254,10 +256,10 @@ fun CreateUserScreenPreview_Error() {
     RandomUserTheme {
         CreateUserScreenContent(
             uiState = UiState.Error("Server error: 500"),
-            selectedGender = "male",
-            selectedNat = "gb",
+            selectedGender = Gender.FEMALE,
+            selectedNationality = "gb",
             onGenderSelected = {},
-            onNatSelected = {},
+            onNationalitySelected = {},
             onGenerateClick = {},
             onBackClick = {}
         )

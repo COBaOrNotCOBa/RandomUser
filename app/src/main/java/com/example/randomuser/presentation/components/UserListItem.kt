@@ -31,11 +31,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.example.randomuser.R
 import com.example.randomuser.domain.model.User
-import com.example.randomuser.presentation.theme.GrayText
-import com.example.randomuser.presentation.userlist.natToFlagEmoji
+import com.example.randomuser.presentation.userlist.nationalityToFlagEmoji
 
 @Composable
 fun UserListItem(
@@ -86,15 +87,15 @@ fun UserListItem(
                     Text(
                         text = it,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = GrayText
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                val natCode = user.nat ?: ""
-                val flag = natToFlagEmoji(natCode)
-                if (natCode.isNotBlank()) {
+                val nationalityCode = user.nationality ?: ""
+                val flag = nationalityToFlagEmoji(nationalityCode)
+                if (nationalityCode.isNotBlank()) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -104,9 +105,9 @@ fun UserListItem(
                             style = MaterialTheme.typography.bodySmall
                         )
                         Text(
-                            text = natCode,
+                            text = nationalityCode,
                             style = MaterialTheme.typography.bodySmall,
-                            color = GrayText
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -118,7 +119,7 @@ fun UserListItem(
                 IconButton(onClick = { menuExpanded = true }) {
                     Icon(
                         imageVector = Icons.Default.MoreVert,
-                        contentDescription = "More"
+                        contentDescription = stringResource(R.string.content_description_more)
                     )
                 }
 
@@ -127,7 +128,7 @@ fun UserListItem(
                     onDismissRequest = { menuExpanded = false }
                 ) {
                     DropdownMenuItem(
-                        text = { Text("Delete") },
+                        text = { Text(stringResource(R.string.menu_delete)) },
                         onClick = {
                             menuExpanded = false
                             onMenuClick()

@@ -2,13 +2,19 @@ package com.example.randomuser.domain.usecase
 
 import com.example.randomuser.domain.model.User
 import com.example.randomuser.domain.repository.UserRepository
+import com.example.randomuser.presentation.model.Gender
 import javax.inject.Inject
 
 class GetRandomUserUseCase @Inject constructor(
-    private val repository: UserRepository
+    private val userRepository: UserRepository
 ) {
     suspend operator fun invoke(
-        gender: String?,
+        gender: Gender,
         nationality: String?
-    ): Result<User> = repository.fetchAndSaveRandomUser(gender, nationality)
+    ): Result<User> {
+        return userRepository.fetchAndSaveRandomUser(
+            gender = gender.apiValue,
+            nationality = nationality
+        )
+    }
 }
