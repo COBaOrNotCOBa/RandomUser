@@ -5,12 +5,14 @@ import com.example.randomuser.fakes.TestData
 import com.example.randomuser.fakes.FakeUserRepository
 import com.example.randomuser.presentation.model.UiState
 import com.example.randomuser.util.MainDispatcherRule
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
 import org.junit.Rule
 import org.junit.Test
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class CreateUserViewModelTest {
 
     @get:Rule

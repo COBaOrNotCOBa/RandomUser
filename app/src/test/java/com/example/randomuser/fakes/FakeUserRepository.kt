@@ -15,13 +15,16 @@ class FakeUserRepository : UserRepository {
     var lastFetchNationality: String? = null
         private set
 
+    var fetchRandomUserResult: Result<User> =
+        Result.failure(IllegalStateException("fetchRandomUserResult not set"))
+
     override suspend fun fetchAndSaveRandomUser(
         gender: String?,
         nationality: String?
     ): Result<User> {
         lastFetchGender = gender
         lastFetchNationality = nationality
-        return Result.failure(IllegalStateException("Not implemented for this test"))
+        return fetchRandomUserResult
     }
 
     override fun getUsers(): Flow<List<User>> = usersFlow
