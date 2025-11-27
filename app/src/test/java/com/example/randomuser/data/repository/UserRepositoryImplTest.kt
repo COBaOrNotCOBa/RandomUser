@@ -2,23 +2,31 @@ package com.example.randomuser.data.repository
 
 import com.example.randomuser.data.local.UserDao
 import com.example.randomuser.data.local.UserEntity
+import com.example.randomuser.data.mapper.toDomain
+import com.example.randomuser.data.mapper.toEntity
 import com.example.randomuser.data.remote.RandomUserApi
-import com.example.randomuser.data.remote.dto.DobDto
-import com.example.randomuser.data.remote.dto.IdDto
-import com.example.randomuser.data.remote.dto.InfoDto
-import com.example.randomuser.data.remote.dto.LocationDto
-import com.example.randomuser.data.remote.dto.LoginDto
-import com.example.randomuser.data.remote.dto.NameDto
-import com.example.randomuser.data.remote.dto.PictureDto
 import com.example.randomuser.data.remote.dto.RandomUserResponseDto
-import com.example.randomuser.data.remote.dto.StreetDto
 import com.example.randomuser.data.remote.dto.UserDto
-import kotlinx.coroutines.flow.Flow
+import com.example.randomuser.domain.model.User
+import com.example.randomuser.fakes.TestData
+import io.mockk.MockKAnnotations
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.unmockkAll
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.ResponseBody.Companion.toResponseBody
-import org.junit.Assert.*
+import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Test
 import retrofit2.HttpException
 import retrofit2.Response
@@ -26,194 +34,174 @@ import java.io.IOException
 
 class UserRepositoryImplTest {
 
+    private lateinit var api: RandomUserApi
+    private lateinit var userDao: UserDao
+    private lateinit var repository: UserRepositoryImpl
+
+    @Before
+    fun setUp() {
+        MockKAnnotations.init(this, relaxUnitFun = true)
+        api = mockk()
+        userDao = mockk(relaxUnitFun = true)
+        repository = UserRepositoryImpl(api, userDao)
+    }
+
+    @After
+    fun tearDown() {
+        unmockkAll()
+    }
+
     @Test
-    fun `fetchAndSaveRandomUser success returns user and inserts into dao`() = runTest {
-        // given
-        val api = FakeRandomUserApi()
-        val dao = FakeUserDao()
-        val repository = UserRepositoryImpl(api, dao)
+    fun `fetchAndSaveRandomUser success stores entity and returns domain user`() = runTest {
+        mockkStatic("com.example.randomuser.data.mapper.UserMappersKt")
 
-        val dtoUser = createJohnUserDto()
-        api.response = RandomUserResponseDto(
-            results = listOf(dtoUser),
-            info = InfoDto(
-                seed = "seed",
-                results = 1,
-                page = 1,
-                version = "1.4"
-            )
-        )
+        val gender = "male"
+        val nationality = "us"
 
-        // when
-        val result = repository.fetchAndSaveRandomUser(
-            gender = "male",
-            nationality = "us"
-        )
+        val userDto: UserDto = mockk()
+        val entity: UserEntity = mockk()
+        val domainUser: User = TestData.userJohn
 
-        // then
+        coEvery { api.getRandomUser(gender, nationality) } returns
+                RandomUserResponseDto(results = listOf(userDto), info = null)
+
+        every { userDto.toEntity() } returns entity
+        every { entity.toDomain() } returns domainUser
+
+        val result = repository.fetchAndSaveRandomUser(gender, nationality)
+
         assertTrue(result.isSuccess)
-        val user = result.getOrNull()!!
-        assertEquals("1", user.id)
-        assertEquals("John Doe", user.fullName)
-        assertEquals("US", user.nationality)
+        assertEquals(domainUser, result.getOrNull())
 
-        // проверяем, что запись ушла в DAO
-        assertEquals(1, dao.storedUsers.size)
-        val stored = dao.storedUsers.first()
-        assertEquals("1", stored.uuid)
-        assertEquals("John Doe", stored.fullName)
-        assertEquals("US", stored.nationality)
+        coVerify(exactly = 1) { api.getRandomUser(gender, nationality) }
+        coVerify(exactly = 1) { userDao.insertUser(entity) }
     }
 
     @Test
-    fun `fetchAndSaveRandomUser with empty results returns failure`() = runTest {
-        // given
-        val api = FakeRandomUserApi().apply {
-            response = RandomUserResponseDto(
-                results = emptyList(),
-                info = null
-            )
-        }
-        val dao = FakeUserDao()
-        val repository = UserRepositoryImpl(api, dao)
+    fun `fetchAndSaveRandomUser returns failure when response has no users`() = runTest {
+        coEvery { api.getRandomUser(null, null) } returns
+                RandomUserResponseDto(results = emptyList(), info = null)
 
-        // when
-        val result = repository.fetchAndSaveRandomUser(
-            gender = null,
-            nationality = null
-        )
+        val result = repository.fetchAndSaveRandomUser(null, null)
 
-        // then
         assertTrue(result.isFailure)
-        assertTrue(
-            result.exceptionOrNull()?.message?.contains("No users in response") == true
-        )
-        assertTrue(dao.storedUsers.isEmpty())
+        val exception = result.exceptionOrNull()
+        assertTrue(exception is IllegalStateException)
+        assertEquals("No users in response", exception?.message)
+
+        coVerify(exactly = 0) { userDao.insertUser(any()) }
     }
 
     @Test
-    fun `fetchAndSaveRandomUser http error returns server error message`() = runTest {
-        // given
-        val api = FakeRandomUserApi().apply {
-            val errorResponse = Response.error<RandomUserResponseDto>(
-                500,
-                "Server error".toResponseBody("application/json".toMediaType())
-            )
-            throwable = HttpException(errorResponse)
-        }
-        val dao = FakeUserDao()
-        val repository = UserRepositoryImpl(api, dao)
+    fun `fetchAndSaveRandomUser returns failure when mapper returns null entity`() = runTest {
+        mockkStatic("com.example.randomuser.data.mapper.UserMappersKt")
 
-        // when
-        val result = repository.fetchAndSaveRandomUser(
-            gender = null,
-            nationality = null
-        )
+        val userDto: UserDto = mockk()
 
-        // then
+        coEvery { api.getRandomUser(null, null) } returns
+                RandomUserResponseDto(results = listOf(userDto), info = null)
+
+        every { userDto.toEntity() } returns null
+
+        val result = repository.fetchAndSaveRandomUser(null, null)
+
         assertTrue(result.isFailure)
-        assertEquals("Server error: 500", result.exceptionOrNull()?.message)
-        assertTrue(dao.storedUsers.isEmpty())
+        val exception = result.exceptionOrNull()
+        assertTrue(exception is IllegalStateException)
+        assertEquals("Invalid user data", exception?.message)
+
+        coVerify(exactly = 0) { userDao.insertUser(any()) }
     }
 
     @Test
-    fun `fetchAndSaveRandomUser io error returns network error message`() = runTest {
-        // given
-        val api = FakeRandomUserApi().apply {
-            throwable = IOException("network down")
-        }
-        val dao = FakeUserDao()
-        val repository = UserRepositoryImpl(api, dao)
+    fun `fetchAndSaveRandomUser wraps HttpException as server error`() = runTest {
+        val body = "error".toResponseBody("text/plain".toMediaType())
+        val response: Response<RandomUserResponseDto> =
+            Response.error(500, body)
+        val httpException = HttpException(response)
 
-        // when
-        val result = repository.fetchAndSaveRandomUser(
-            gender = null,
-            nationality = null
-        )
+        coEvery { api.getRandomUser(any(), any()) } throws httpException
 
-        // then
+        val result = repository.fetchAndSaveRandomUser("male", "us")
+
         assertTrue(result.isFailure)
-        assertEquals(
-            "Network error. Check your connection.",
-            result.exceptionOrNull()?.message
-        )
-        assertTrue(dao.storedUsers.isEmpty())
+        val exception = result.exceptionOrNull()
+        assertNotNull(exception)
+        assertTrue(exception is Exception)
+        assertEquals("Server error: 500", exception?.message)
     }
 
-    // --- Fakes & helpers ---
+    @Test
+    fun `fetchAndSaveRandomUser wraps IOException as network error`() = runTest {
+        coEvery { api.getRandomUser(any(), any()) } throws IOException("no internet")
 
-    private class FakeRandomUserApi : RandomUserApi {
-        var response: RandomUserResponseDto? = null
-        var throwable: Throwable? = null
+        val result = repository.fetchAndSaveRandomUser("male", "us")
 
-        override suspend fun getRandomUser(
-            gender: String?,
-            nationality: String?
-        ): RandomUserResponseDto {
-            throwable?.let { throw it }
-            return response ?: error("FakeRandomUserApi.response is not set")
-        }
+        assertTrue(result.isFailure)
+        val exception = result.exceptionOrNull()
+        assertNotNull(exception)
+        assertEquals("Network error. Check your connection.", exception?.message)
     }
 
-    private class FakeUserDao : UserDao {
-        private val usersInternal = mutableListOf<UserEntity>()
-        val storedUsers: List<UserEntity>
-            get() = usersInternal.toList()
+    @Test
+    fun `fetchAndSaveRandomUser wraps generic exception as unexpected error`() = runTest {
+        coEvery { api.getRandomUser(any(), any()) } throws IllegalStateException("boom")
 
-        override fun getUsers(): Flow<List<UserEntity>> =
-            flowOf(usersInternal.toList())
+        val result = repository.fetchAndSaveRandomUser("male", "us")
 
-        override fun getUserById(id: String): Flow<UserEntity?> =
-            flowOf(usersInternal.firstOrNull { it.uuid == id })
-
-        override suspend fun insertUser(user: UserEntity) {
-            usersInternal.removeAll { it.uuid == user.uuid }
-            usersInternal.add(user)
-        }
-
-        override suspend fun deleteUser(id: String) {
-            usersInternal.removeAll { it.uuid == id }
-        }
+        assertTrue(result.isFailure)
+        val exception = result.exceptionOrNull()
+        assertNotNull(exception)
+        assertEquals("Unexpected error: boom", exception?.message)
     }
 
-    private fun createJohnUserDto(): UserDto =
-        UserDto(
-            gender = "male",
-            name = NameDto(
-                title = null,
-                first = "John",
-                last = "Doe"
-            ),
-            location = LocationDto(
-                street = StreetDto(
-                    number = 1,
-                    name = "1st Avenue"
-                ),
-                city = "New York",
-                state = "NY",
-                country = "United States",
-                postcode = "10001"
-            ),
-            email = "john.doe@example.com",
-            login = LoginDto(
-                uuid = "1",
-                username = "johndoe"
-            ),
-            dob = DobDto(
-                date = "1995-01-01T00:00:00Z",
-                age = 30
-            ),
-            phone = "+1 111 111",
-            cell = "+1 222 222",
-            id = IdDto(
-                name = "SSN",
-                value = "123-45-6789"
-            ),
-            picture = PictureDto(
-                large = "https://example.com/john.jpg",
-                medium = "",
-                thumbnail = ""
-            ),
-            nationality = "US"
-        )
+    @Test
+    fun `getUsers maps entities to domain users`() = runTest {
+        mockkStatic("com.example.randomuser.data.mapper.UserMappersKt")
+
+        val entity: UserEntity = mockk()
+        val domainUser: User = TestData.userJohn
+
+        every { entity.toDomain() } returns domainUser
+        coEvery { userDao.getUsers() } returns flowOf(listOf(entity))
+
+        val result = repository.getUsers().first()
+
+        assertEquals(listOf(domainUser), result)
+    }
+
+    @Test
+    fun `getUserById maps entity to domain user`() = runTest {
+        mockkStatic("com.example.randomuser.data.mapper.UserMappersKt")
+
+        val entity: UserEntity = mockk()
+        val domainUser: User = TestData.userJohn
+        val userId = "1"
+
+        every { entity.toDomain() } returns domainUser
+        coEvery { userDao.getUserById(userId) } returns flowOf(entity)
+
+        val result = repository.getUserById(userId).first()
+
+        assertEquals(domainUser, result)
+    }
+
+    @Test
+    fun `getUserById returns null when dao returns null`() = runTest {
+        val userId = "1"
+        coEvery { userDao.getUserById(userId) } returns flowOf(null)
+
+        val result = repository.getUserById(userId).first()
+
+        assertNull(result)
+    }
+
+    @Test
+    fun `deleteUser delegates to dao`() = runTest {
+        val userId = "123"
+
+        repository.deleteUser(userId)
+
+        coVerify(exactly = 1) { userDao.deleteUser(userId) }
+    }
 }

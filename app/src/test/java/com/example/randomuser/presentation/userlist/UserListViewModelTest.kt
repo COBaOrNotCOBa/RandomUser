@@ -1,138 +1,122 @@
 package com.example.randomuser.presentation.userlist
 
+import com.example.randomuser.R
 import com.example.randomuser.domain.model.User
+import com.example.randomuser.domain.repository.UserRepository
 import com.example.randomuser.domain.usecase.DeleteUserUseCase
 import com.example.randomuser.domain.usecase.GetUsersUseCase
-import com.example.randomuser.fakes.FakeStringProvider
-import com.example.randomuser.fakes.FakeUserRepository
+import com.example.randomuser.fakes.TestData
+import com.example.randomuser.presentation.common.StringProvider
 import com.example.randomuser.presentation.model.UiState
 import com.example.randomuser.util.MainDispatcherRule
+import io.mockk.coVerify
+import io.mockk.every
+import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
+import org.junit.Assert.*
 import org.junit.Rule
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
+
 class UserListViewModelTest {
 
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
-    @Test
-    fun `empty users list produces Empty state`() = runTest {
-        val repository = FakeUserRepository()
-        val viewModel = createViewModel(repository)
+    private val userRepository: UserRepository = mockk(relaxed = true)
+    private val getUsersUseCase = GetUsersUseCase(userRepository)
+    private val deleteUserUseCase = DeleteUserUseCase(userRepository)
+    private val stringProvider: StringProvider = mockk()
 
-        val job = launch { viewModel.uiState.collect() }
-
-        try {
-            advanceUntilIdle()
-
-            val state = viewModel.uiState.value
-            assertTrue(state is UiState.Empty)
-            assertEquals(EMPTY_MESSAGE, (state as UiState.Empty).message)
-        } finally {
-            job.cancel()
-        }
-    }
-
-    @Test
-    fun `non empty users list produces Success state`() = runTest {
-        val repository = FakeUserRepository()
-        repository.setUsers(listOf(createUser()))
-
-        val viewModel = createViewModel(repository)
-
-        val job = launch { viewModel.uiState.collect() }
-
-        try {
-            advanceUntilIdle()
-
-            val state = viewModel.uiState.value
-            assertTrue(state is UiState.Success)
-            val data = (state as UiState.Success).data
-            assertEquals(1, data.size)
-            assertEquals(FULL_NAME, data[0].fullName)
-        } finally {
-            job.cancel()
-        }
-    }
-
-    @Test
-    fun `onDeleteUser removes user and emits Empty state`() = runTest {
-        val repository = FakeUserRepository()
-        repository.setUsers(listOf(createUser()))
-
-        val viewModel = createViewModel(repository)
-
-        val job = launch { viewModel.uiState.collect() }
-
-        try {
-            advanceUntilIdle()
-
-            val initialState = viewModel.uiState.value
-            assertTrue(initialState is UiState.Success)
-            assertEquals(1, (initialState as UiState.Success).data.size)
-
-            viewModel.onDeleteUser(USER_ID)
-            advanceUntilIdle()
-
-            val finalState = viewModel.uiState.value
-            assertTrue(finalState is UiState.Empty)
-            assertEquals(EMPTY_MESSAGE, (finalState as UiState.Empty).message)
-        } finally {
-            job.cancel()
-        }
-    }
-
-    private fun createViewModel(repository: FakeUserRepository): UserListViewModel {
-        val getUsersUseCase = GetUsersUseCase(repository)
-        val deleteUserUseCase = DeleteUserUseCase(repository)
-        val stringProvider = FakeStringProvider()
-
+    private fun createViewModel(getUsersFlow: Flow<List<User>>): UserListViewModel {
+        every { userRepository.getUsers() } returns getUsersFlow
         return UserListViewModel(
             getUsersUseCase = getUsersUseCase,
             deleteUserUseCase = deleteUserUseCase,
-            stringProvider = stringProvider,
+            stringProvider = stringProvider
         )
     }
 
-    private fun createUser(): User =
-        User(
-            id = USER_ID,
-            fullName = FULL_NAME,
-            gender = GENDER,
-            email = EMAIL,
-            phone = PHONE,
-            cell = null,
-            age = AGE,
-            dateOfBirth = DATE,
-            country = COUNTRY,
-            city = CITY,
-            street = STREET,
-            pictureUrl = PICTURE_URL,
-            nationality = NAT
-        )
+    @Test
+    fun `when users list is empty emits Empty state with proper message`() = runTest {
+        val emptyMessage = "You have not created any users yet"
+        every { stringProvider.get(R.string.list_empty_message, *anyVararg()) } returns emptyMessage
 
-    private companion object {
-        const val USER_ID = "1"
-        const val FULL_NAME = "John Doe"
-        const val GENDER = "male"
-        const val EMAIL = "john@example.com"
-        const val PHONE = "+44 20 0000 0000"
-        const val AGE = 30
-        const val DATE = "1990-01-01T00:00:00Z"
-        const val COUNTRY = "UK"
-        const val CITY = "London"
-        const val STREET = "221B Baker Street"
-        const val PICTURE_URL = "https://example.com/photo.jpg"
-        const val NAT = "GB"
+        val viewModel = createViewModel(flowOf(emptyList()))
 
-        const val EMPTY_MESSAGE = "You have not created any users yet"
+        val states = mutableListOf<UiState<List<User>>>()
+        val job = launch { viewModel.uiState.toList(states) }
+
+        advanceUntilIdle()
+
+        assertTrue(states.first() is UiState.Loading)
+        val last = states.last()
+        assertTrue(last is UiState.Empty)
+        assertEquals(emptyMessage, (last as UiState.Empty).message)
+
+        job.cancel()
+    }
+
+    @Test
+    fun `when users list is not empty emits Success with users`() = runTest {
+        val user = TestData.userJohn
+        val viewModel = createViewModel(flowOf(listOf(user)))
+
+        val states = mutableListOf<UiState<List<User>>>()
+        val job = launch { viewModel.uiState.toList(states) }
+
+        advanceUntilIdle()
+
+        assertTrue(states.first() is UiState.Loading)
+        val last = states.last()
+        assertTrue(last is UiState.Success)
+        assertEquals(listOf(user), (last as UiState.Success).data)
+
+        job.cancel()
+    }
+
+    @Test
+    fun `when repository flow throws error emits Error state with message`() = runTest {
+        val errorMessage = "Error loading users"
+        every { stringProvider.get(R.string.error_loading_users, *anyVararg()) } returns errorMessage
+
+        val errorFlow: Flow<List<User>> = flow {
+            throw RuntimeException("boom")
+        }
+
+        val viewModel = createViewModel(errorFlow)
+
+        val states = mutableListOf<UiState<List<User>>>()
+        val job = launch { viewModel.uiState.toList(states) }
+
+        advanceUntilIdle()
+
+        val last = states.last()
+        assertTrue(last is UiState.Error)
+        assertEquals(errorMessage, (last as UiState.Error).message)
+
+        job.cancel()
+    }
+
+    @Test
+    fun `onDeleteUser calls DeleteUserUseCase with correct id`() = runTest {
+        val viewModel = createViewModel(flowOf(emptyList()))
+
+        val userId = "123"
+        viewModel.onDeleteUser(userId)
+
+        advanceUntilIdle()
+
+        coVerify(exactly = 1) {
+            userRepository.deleteUser(userId)
+        }
     }
 }

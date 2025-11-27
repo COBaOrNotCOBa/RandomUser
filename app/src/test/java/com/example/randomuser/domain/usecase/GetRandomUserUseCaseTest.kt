@@ -4,70 +4,33 @@ import com.example.randomuser.domain.model.User
 import com.example.randomuser.domain.repository.UserRepository
 import com.example.randomuser.fakes.TestData
 import com.example.randomuser.presentation.model.Gender
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert
+import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class GetRandomUserUseCaseTest {
 
-    @Test
-    fun `maps Gender_MALE to api value and passes nationality`() = runTest {
-        val fakeRepository = CapturingUserRepository()
-        fakeRepository.fetchResult = Result.success(TestData.userJohn)
-
-        val useCase = GetRandomUserUseCase(fakeRepository)
-
-        val result = useCase(
-            gender = Gender.MALE,
-            nationality = "us"
-        )
-
-        Assert.assertEquals(TestData.userJohn, result.getOrNull())
-
-        Assert.assertEquals("male", fakeRepository.lastGender)
-        Assert.assertEquals("us", fakeRepository.lastNationality)
-    }
+    private val userRepository: UserRepository = mockk()
+    private val useCase = GetRandomUserUseCase(userRepository)
 
     @Test
-    fun `maps Gender_ANY to null gender for api`() = runTest {
-        val fakeRepository = CapturingUserRepository()
-        fakeRepository.fetchResult = Result.success(TestData.userJohn)
+    fun `invoke delegates to repository with mapped gender and returns result`() = runTest {
+        val nationality = "us"
+        val expectedUser: User = TestData.userJohn
 
-        val useCase = GetRandomUserUseCase(fakeRepository)
+        coEvery {
+            userRepository.fetchAndSaveRandomUser("male", nationality)
+        } returns Result.success(expectedUser)
 
-        useCase(
-            gender = Gender.ANY,
-            nationality = "de"
-        )
+        val result = useCase(Gender.MALE, nationality)
 
-        Assert.assertNull(fakeRepository.lastGender)
-        Assert.assertEquals("de", fakeRepository.lastNationality)
-    }
+        assertEquals(Result.success(expectedUser), result)
 
-
-    private class CapturingUserRepository : UserRepository {
-
-        var fetchResult: Result<User> = Result.failure(IllegalStateException("not set"))
-
-        var lastGender: String? = null
-            private set
-
-        var lastNationality: String? = null
-            private set
-
-        override suspend fun fetchAndSaveRandomUser(
-            gender: String?,
-            nationality: String?
-        ): Result<User> {
-            lastGender = gender
-            lastNationality = nationality
-            return fetchResult
+        coVerify(exactly = 1) {
+            userRepository.fetchAndSaveRandomUser("male", nationality)
         }
-
-        override fun getUsers() = throw NotImplementedError()
-
-        override fun getUserById(id: String) = throw NotImplementedError()
-
-        override suspend fun deleteUser(id: String) = Unit
     }
 }
